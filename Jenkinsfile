@@ -29,13 +29,13 @@ pipeline {
             steps {
                 echo 'Running tests...'
                 sh '''
-                    pytest test_calculator.py -v --cov=calculator --cov-report=html --cov-report=term
+                    pytest test_calculator.py -v --cov=calculator --cov-report=html --cov-report=term --junitxml=test-results.xml
                 '''
             }
             post {
                 always {
                     echo 'Archiving test results...'
-                    junit skipPublishingChecks: true, testResults: '**/test-results/*.xml', allowEmptyResults: true
+                    junit skipPublishingChecks: true, testResults: 'test-results.xml', allowEmptyResults: true
                 }
             }
         }
@@ -87,3 +87,4 @@ pipeline {
         }
     }
 }
+    
