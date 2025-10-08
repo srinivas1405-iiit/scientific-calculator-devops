@@ -1,44 +1,17 @@
 ---
 - name: Deploy Scientific Calculator Application
   hosts: localhost
-  become: yes
+  become: no
   vars:
     docker_image: "srinivas1405/scientific-calculator:latest"
     container_name: "scientific-calculator"
     
   tasks:
-    - name: Update apt cache
-      apt:
-        update_cache: yes
-      when: ansible_os_family == "Debian"
-      
-    - name: Install Docker dependencies
-      apt:
-        name:
-          - apt-transport-https
-          - ca-certificates
-          - curl
-          - software-properties-common
-        state: present
-      when: ansible_os_family == "Debian"
-    
     - name: Check if Docker is installed
       command: docker --version
       register: docker_check
       ignore_errors: yes
       
-    - name: Install Docker (if not installed)
-      shell: |
-        curl -fsSL https://get.docker.com -o get-docker.sh
-        sh get-docker.sh
-      when: docker_check.rc != 0
-      
-    - name: Start Docker service
-      service:
-        name: docker
-        state: started
-        enabled: yes
-        
     - name: Stop existing container
       docker_container:
         name: "{{ container_name }}"
@@ -65,7 +38,7 @@
         restart_policy: unless-stopped
         interactive: yes
         tty: yes
-        detached: no
+        detached: yes
         
     - name: Display container status
       command: docker ps -a
