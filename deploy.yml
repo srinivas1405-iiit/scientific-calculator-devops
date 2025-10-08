@@ -7,43 +7,20 @@
     container_name: "scientific-calculator"
     
   tasks:
-    - name: Check if Docker is installed
-      command: docker --version
-      register: docker_check
+    - name: Stop and remove existing container
+      shell: docker stop {{ container_name }} && docker rm {{ container_name }}
       ignore_errors: yes
       
-    - name: Stop existing container
-      docker_container:
-        name: "{{ container_name }}"
-        state: absent
-      ignore_errors: yes
+    - name: Pull latest image
+      shell: docker pull {{ docker_image }}
       
-    - name: Remove old image
-      docker_image:
-        name: "{{ docker_image }}"
-        state: absent
-        force_absent: yes
-      ignore_errors: yes
+    - name: Run container
+      shell: docker run -d --name {{ container_name }} {{ docker_image }}
       
-    - name: Pull Docker image from Docker Hub
-      docker_image:
-        name: "{{ docker_image }}"
-        source: pull
-        
-    - name: Run Docker container
-      docker_container:
-        name: "{{ container_name }}"
-        image: "{{ docker_image }}"
-        state: started
-        restart_policy: unless-stopped
-        interactive: yes
-        tty: yes
-        detached: yes
-        
-    - name: Display container status
-      command: docker ps -a
-      register: container_status
+    - name: Show running containers
+      shell: docker ps
+      register: containers
       
-    - name: Show container status
+    - name: Display containers
       debug:
-        var: container_status.stdout_lines
+        var: containers.stdout_lines
